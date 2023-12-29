@@ -1,5 +1,3 @@
-*.parquet
-*.csv
-.ipynb_checkpoints
+*.ipynb_checkpoints
 */.ipynb_checkpoints/*
 first_circle_copy.ipynb
