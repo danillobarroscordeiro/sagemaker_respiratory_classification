@@ -1,6 +1,7 @@
 *.ipynb_checkpoints
 */.ipynb_checkpoints/*
 first_circle_copy.ipynb
+first_cicle copy 2.ipynb
 *.csv
 *.parquet
 .env
