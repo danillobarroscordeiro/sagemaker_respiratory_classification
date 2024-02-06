@@ -3,7 +3,9 @@ import sagemaker
 import argparse
 import os
 import json
+import sys
 import boto3
+import logging
 from sagemaker.tuner import ParameterRange, CategoricalParameter, ContinuousParameter, HyperparameterTuner
 
 base_dir = "/opt/ml/processing"
@@ -13,19 +15,20 @@ base_dir_jobinfo = f"{base_dir}/jobinfo"
 def train(
     train=None, 
     test=None, 
-    image_uri=None, 
-    instance_type="ml.c5.2xlarge", 
+    image_uri_tuning=None,
+    image_uri_model=None, 
+    instance_type="ml.m5.xlarge", 
     instance_count=1, 
     output_path=None,
-    k = 3,
-    max_jobs=30,
-    max_parallel_jobs=3,
+    k = 2,
+    max_jobs=10,
+    max_parallel_jobs=2,
     eta = 0.1,
     max_depth = 3,
     gamma=1,
+    subsample=0.6,
     min_child_weight=5,
-    subsample=1,
-    region = "us-east-1",
+    region="us-east-1",
     role=None):
     
     """
@@ -46,11 +49,10 @@ def train(
     """
     sagemaker_session = sagemaker.session.Session()
     sm_client = boto3.client("sagemaker")
-    # role = sagemaker.get_execution_role()
 
     # An Estimator object to be associated with the HyperparameterTuner job. 
     cv_estimator = Estimator(
-        image_uri=image_uri,
+        image_uri=image_uri_tuning,
         instance_type=instance_type,
         instance_count=instance_count,
         role=role,
@@ -58,19 +60,21 @@ def train(
         output_path=output_path
     )
 
+
     cv_estimator.set_hyperparameters(
         train_src = train,
         test_src = test,
         k = k,
         instance_type = instance_type,
-        region = region)
+        region = region,
+    )
 
     hyperparameter_ranges = {
-        'eta': sagemaker.tuner.ContinuousParameter(0.1, 0.5),
-        'max_depth': sagemaker.tuner.IntegerParameter(2, 9),
-        'gamma': sagemaker.tuner.IntegerParameter(3, 10),
-        'min_child_weight': sagemaker.tuner.IntegerParameter(8, 15),
-        'subsample': sagemaker.tuner.ContinuousParameter(0.5, 0.7)
+        'eta': sagemaker.tuner.ContinuousParameter(0.48, 0.5),
+        'max_depth': sagemaker.tuner.IntegerParameter(2, 3),
+        'gamma': sagemaker.tuner.IntegerParameter(3, 4),
+        'subsample': sagemaker.tuner.ContinuousParameter(0.65, 0.7),
+        'min_child_weight': sagemaker.tuner.IntegerParameter(5,7)
     }
 
     objective_metric_name = "test:F1_score_average"
@@ -81,24 +85,12 @@ def train(
         objective_type="Maximize",
         max_jobs=max_jobs,
         strategy="Bayesian",
-        base_tuning_job_name="respiratory-classifi",
+        base_tuning_job_name="respiratory-clf-tuning",
         max_parallel_jobs=max_parallel_jobs,
         metric_definitions=[
             {
                 "Name": objective_metric_name, 
                 "Regex": "average model f1 test score:(.*?);"
-            },
-            {
-                "Name": 'test:Cohen_score_average', 
-                "Regex": "average model cohen test score:(.*?);"
-            },
-            {
-                "Name": 'test:F1_score_std', 
-                "Regex": "std model f1 test score:(.*?);"
-            },
-            {
-                "Name": 'test:Cohen_score_std', 
-                "Regex": "std model cohen test score:(.*?);"
             }
         ]
     )
@@ -116,32 +108,19 @@ def train(
     jobinfo['name'] = tuner_job_name
     jobinfo['best_training_job'] = best_traning_job_name
     jobinfo['hyperparams'] = best_hyperparams
+    
+    
     f1_value_avg = [
         x['Value'] for x in best_performing_job['FinalMetricDataList'] 
         if x['MetricName'] == objective_metric_name
     ][0]
-    cohen_value_avg = [
-        x['Value'] for x in best_performing_job['FinalMetricDataList'] 
-        if x['MetricName'] == 'test:Cohen_score'
-    ][0]
-    f1_value_std = [
-    x['Value'] for x in best_performing_job['FinalMetricDataList'] 
-    if x['MetricName'] == 'test:F1_score_std'
-    ][0]
-    cohen_value_std = [
-    x['Value'] for x in best_performing_job['FinalMetricDataList'] 
-    if x['MetricName'] == 'test:cohen_score_std'
-    ][0]
+
 
     evaluation_metrics = {
         "multiclass_classification_metrics": {
-            "F1 score" : {
+            "F1_score" : {
                 "value" : f1_value_avg,
-                "standard_deviation" : f1_value_std
-            },
-            "Cohen score" : {
-                "value" : cohen_value_avg,
-                "standard_deviation" : cohen_value_std
+                "standard_deviation" : "NaN"
             },
         }
     }
@@ -155,25 +134,26 @@ def train(
 if __name__ =='__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-k', '--k', type=int, default=3)
-    parser.add_argument('--image-uri', type=str)    
+    parser.add_argument('-k', '--k', type=int, default=2)
+    parser.add_argument('--image-uri-tuning', type=str)
     parser.add_argument('--train', type=str)
     parser.add_argument('--test', type=str)
-    parser.add_argument('--instance-type', type=str, default="ml.c4.xlarge")
+    parser.add_argument('--instance-type', type=str, default="ml.c5.xlarge")
     parser.add_argument('--instance-count', type=int, default=1)
     parser.add_argument('--output-path', type=str)
-    parser.add_argument('--max-jobs', type=int, default=30)
-    parser.add_argument('--max-parallel-jobs', type=int, default=3)
+    parser.add_argument('--max-jobs', type=int, default=10)
+    parser.add_argument('--max-parallel-jobs', type=int, default=2)
     parser.add_argument('--region', type=str, default="us-east-1")
     parser.add_argument('--role', type=str)
     
     args = parser.parse_args()
     os.environ['AWS_DEFAULT_REGION'] = args.region
-    
+
+
     train(
         train=args.train, 
         test=args.test, 
-        image_uri=args.image_uri, 
+        image_uri_tuning=args.image_uri_tuning,
         instance_type=args.instance_type, 
         instance_count=args.instance_count,
         output_path=args.output_path,

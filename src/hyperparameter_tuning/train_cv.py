@@ -1,12 +1,12 @@
 import argparse
 import pandas as pd
-from numpy import genfromtxt
 import os
-from xgboost import XGBClassifier 
+import xgboost as xgb
 from joblib import load, dump
 import logging
 import json
-from sklearn.metrics import cohen_kappa_score, f1_score
+from sklearn.metrics import cohen_kappa_score
+from sklearn.metrics import f1_score as calculate_f1_score
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,10 +36,10 @@ def train(train=None, test=None):
             'does not have permission to access the data.')
         )
 
-    X_train = genfromtxt(f'{train}/train_x.csv', delimiter=',')
-    y_train = genfromtxt(f'{train}/train_y.csv', delimiter=',')
+    X_train = pd.read_csv(f'{train}/train_x.csv', sep=',', header=0)
+    y_train = pd.read_csv(f'{train}/train_y.csv', sep=',', header=None)
 
-    clf = XGBClassifier(
+    clf = xgb.XGBClassifier(
         eta=args.eta, 
         max_depth=args.max_depth, 
         gamma=args.gamma,
@@ -60,11 +60,11 @@ def evaluate(test=None, model=None):
         test: location on the filesystem for test dataset 
     """
     if test:
-        X_test = genfromtxt(f'{test}/test_x.csv', delimiter=',')
-        y_test = genfromtxt(f'{test}/test_y.csv', delimiter=',')
+        X_test = pd.read_csv(f'{test}/test_x.csv', delimiter=',', header=0)
+        y_test = pd.read_csv(f'{test}/test_y.csv', delimiter=',', header=None)
         y_predicted = model.predict(X_test)
         cohen_score = cohen_kappa_score(y_test, y_predicted)
-        f1_score = f1_score(y_test, y_predicted, average='macro')
+        f1_score = calculate_f1_score(y_test, y_predicted, average='macro')
         
         
         logging.info(f'model cohen score:{cohen_score};')

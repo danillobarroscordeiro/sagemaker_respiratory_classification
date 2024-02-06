@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 import boto3
 import re
@@ -10,10 +9,14 @@ import time
 import numpy as np
 import logging
 import sys
+from datetime import datetime
+from dotenv import load_dotenv
 
+load_dotenv('/opt/ml/code/.env')
 logging.basicConfig(level=logging.INFO)
 
 def fit_model(
+        image_uri_model,
         instance_type, 
         output_path,
         s3_train_base_dir,
@@ -37,7 +40,8 @@ def fit_model(
         Returns: 
             Sagemaker Estimator created with given input parameters.
     """
-    sklearn_framework_version='1.2-1'
+    timestamp = datetime.now().strftime('%Y%m%d-%H-%M-%S-%f')[:-3]
+    job_name = f"respiratory-clf-skl-train-{timestamp}"
     script_path = 'train.py'
 
     sagemaker_session = sagemaker.Session()
@@ -46,17 +50,14 @@ def fit_model(
     sklearn_estimator = SKLearn(
         entry_point=script_path,
         instance_type=instance_type,
-        framework_version=sklearn_framework_version,
+        instance_count=1,
         role=role,
-        keep_alive_period_in_seconds=600,
-        sagemaker_session=sagemaker_session,
+        image_uri=image_uri_model,
         output_path=output_path,
         hyperparameters={
             'eta': eta,
             'max_depth' : max_depth,
-            'gamma': gamma,
-            "min_child_weight": min_child_weight,
-            "subsample": subsample
+            'gamma': gamma
         },
         metric_definitions=[
             { "Name": "test:f1_score", "Regex": "model F1 score:(.*?);"},
@@ -66,7 +67,8 @@ def fit_model(
     sklearn_estimator.fit(
         inputs = { 'train': f'{s3_train_base_dir}/{f}',
         'test':  f'{s3_test_base_dir}/{f}'},
-        wait=False
+        wait=False,
+        job_name=job_name
     )
     return sklearn_estimator
 
@@ -137,21 +139,25 @@ def train():
     parser.add_argument('--max_depth', type=int)
     parser.add_argument('--min_child_weight', type=int)
     parser.add_argument('--subsample', type=float)
-    parser.add_argument('-k', '--k', type=int, default=3)
+    parser.add_argument('-k', '--k', type=int, default=2)
     parser.add_argument('--train_src', type=str)
     parser.add_argument('--test_src', type=str)
     parser.add_argument('--output_path', type=str)
     parser.add_argument('--instance_type', type=str, default="ml.c4.xlarge")
     parser.add_argument('--region', type=str, default="us-east-1")
-    
+    parser.add_argument('--image_uri_model', type=str, default=os.getenv("ECR_IMAGE_MODEL"))
+
     args = parser.parse_args()
 
     os.environ['AWS_DEFAULT_REGION'] = args.region
+
     sm_client = boto3.client("sagemaker")
     training_jobs = []
+    
     # Fit k training jobs with the specified parameters.
     for f in range(args.k):
         sklearn_estimator = fit_model(
+            image_uri_model=args.image_uri_model,
             instance_type=args.instance_type,
             output_path=args.output_path,
             s3_train_base_dir=args.train_src,
@@ -161,14 +167,15 @@ def train():
             max_depth=args.max_depth, 
             gamma=args.gamma,
             min_child_weight=args.min_child_weight,
-            subsample=args.subsample,
+            subsample=args.subsample
         )
+        
         training_jobs.append(sklearn_estimator)
         time.sleep(5) # avoid Sagemaker Training Job API throttling
 
     monitor_training_jobs(training_jobs=training_jobs, sm_client=sm_client)
-    f1_score, cohen_score = evaluation(training_jobs=training_jobs, sm_client=sm_client)
-    return f1_score, cohen_score
+    f1_score, cohen_score, f1_score_std, cohen_score_std = evaluation(training_jobs=training_jobs, sm_client=sm_client)
+    return f1_score, cohen_score, f1_score_std, cohen_score_std
 
 if __name__ == '__main__':
     train()

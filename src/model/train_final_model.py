@@ -53,9 +53,18 @@ def read_preprocessor():
     
     with open('encoder.joblib', 'wb') as f:
         s3.download_fileobj(bucket_name, path, f)
-        preprocessor = load("preprocessor.joblib")
-    
+#        preprocessor = load("encoder.joblib")
+
+    if os.path.exists('encoder.joblib'):
+        print(f"File {'encoder.joblib'} downloaded successfully.")
+        preprocessor = load('encoder.joblib')
+    else:
+        print(f"Failed to download {'encoder.joblib'}.")
+        preprocessor = None
+
     return preprocessor
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
