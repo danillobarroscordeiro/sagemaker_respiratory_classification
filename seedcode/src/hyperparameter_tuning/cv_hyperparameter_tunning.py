@@ -20,8 +20,8 @@ def train(
     instance_type="ml.m5.xlarge", 
     instance_count=1, 
     output_path=None,
-    k = 2,
-    max_jobs=10,
+    k = 3,
+    max_tuning_jobs=6,
     max_parallel_jobs=2,
     eta = 0.1,
     max_depth = 3,
@@ -44,7 +44,7 @@ def train(
         instance_count: number of instances to be used for the Sagemaker Training Jobs.
         output_path: S3 URI for the output artifacts generated in this script.
         k: number of k in Kfold cross validation
-        max_jobs: Maximum number of jobs the HyperparameterTuner triggers
+        max_tuning_jobs: Maximum number of jobs the HyperparameterTuner triggers
         max_parallel_jobs: Maximum number of parallel jobs the HyperparameterTuner trigger in one batch.
     """
     sagemaker_session = sagemaker.session.Session()
@@ -67,6 +67,7 @@ def train(
         k = k,
         instance_type = instance_type,
         region = region,
+        image_uri_model = image_uri_model
     )
 
     hyperparameter_ranges = {
@@ -83,9 +84,9 @@ def train(
         objective_metric_name,
         hyperparameter_ranges,
         objective_type="Maximize",
-        max_jobs=max_jobs,
+        max_jobs=max_tuning_jobs,
         strategy="Bayesian",
-        base_tuning_job_name="respiratory-clf-tuning",
+        base_tuning_job_name="respiratory-clf-cv-tuning",
         max_parallel_jobs=max_parallel_jobs,
         metric_definitions=[
             {
@@ -134,14 +135,15 @@ def train(
 if __name__ =='__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-k', '--k', type=int, default=2)
+    parser.add_argument('-k', '--k', type=int, default=3)
     parser.add_argument('--image-uri-tuning', type=str)
+    parser.add_argument('--image-uri-model', type=str)
     parser.add_argument('--train', type=str)
     parser.add_argument('--test', type=str)
     parser.add_argument('--instance-type', type=str, default="ml.c5.xlarge")
     parser.add_argument('--instance-count', type=int, default=1)
     parser.add_argument('--output-path', type=str)
-    parser.add_argument('--max-jobs', type=int, default=10)
+    parser.add_argument('--max-tuning-jobs', type=int, default=6)
     parser.add_argument('--max-parallel-jobs', type=int, default=2)
     parser.add_argument('--region', type=str, default="us-east-1")
     parser.add_argument('--role', type=str)
@@ -154,11 +156,12 @@ if __name__ =='__main__':
         train=args.train, 
         test=args.test, 
         image_uri_tuning=args.image_uri_tuning,
+        image_uri_model=args.image_uri_model,
         instance_type=args.instance_type, 
         instance_count=args.instance_count,
         output_path=args.output_path,
         k=args.k,
-        max_jobs=args.max_jobs,
+        max_tuning_jobs=args.max_tuning_jobs,
         max_parallel_jobs=args.max_parallel_jobs,
         region = args.region,
         role=args.role

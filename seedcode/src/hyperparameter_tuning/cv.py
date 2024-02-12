@@ -145,7 +145,8 @@ def train():
     parser.add_argument('--output_path', type=str)
     parser.add_argument('--instance_type', type=str, default="ml.c4.xlarge")
     parser.add_argument('--region', type=str, default="us-east-1")
-    parser.add_argument('--image_uri_model', type=str, default=os.getenv("ECR_IMAGE_MODEL"))
+    parser.add_argument('--image_uri_model', type=str)
+    #parser.add_argument('--image_uri_model', type=str, default=os.getenv("ECR_IMAGE_MODEL"))
 
     args = parser.parse_args()
 
