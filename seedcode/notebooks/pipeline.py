@@ -246,7 +246,7 @@ def get_pipeline(
                 destination=s3_bucket_base_path_test
             )
         ],
-        code=os.path.join(base_dir,"/hyperparameter_tuning/preprocessing_cv.py"),
+        code=os.path.join(base_dir,"hyperparameter_tuning/preprocessing_cv.py"),
         job_arguments=["--k", k]
     )
 
@@ -335,7 +335,7 @@ def get_pipeline(
                 destination=s3_bucket_base_path_preprocessor             
             )
         ],
-        code=os.path.join(base_dir,"/model/preprocessing.py")
+        code=os.path.join(base_dir,"model/preprocessing.py")
     )
 
 
