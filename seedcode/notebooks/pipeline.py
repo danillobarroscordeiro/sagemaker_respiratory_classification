@@ -127,6 +127,7 @@ def get_pipeline(
     region: str,
     role: str = None,
     default_bucket: str = None,
+    sagemaker_project_name: str = None,
     s3_bucket_base_path_train: str = s3_bucket_base_path_train,
     s3_bucket_base_path_test: str = s3_bucket_base_path_test,
     s3_bucket_base_path_cleaned: str = s3_bucket_base_path_cleaned,
