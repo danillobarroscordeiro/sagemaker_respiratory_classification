@@ -62,6 +62,7 @@ s3_bucket_base_path_preprocessor = os.path.join(default_bucket, "/estimator/prep
 s3_bucket_base_path_evaluation = os.path.join(default_bucket, "/evaluation")
 s3_bucket_base_path_jobinfo = os.path.join(default_bucket, "/jobinfo")
 s3_bucket_base_path_output = os.path.join(default_bucket, "/output")
+s3_bucket_base_path_code = os.path.join(default_bucket, "/code")
 
 def get_session(region, default_bucket):
     """Gets the sagemaker session based on the region.
@@ -246,7 +247,7 @@ def get_pipeline(
                 destination=s3_bucket_base_path_test
             )
         ],
-        code=os.path.join(base_dir,"hyperparameter_tuning/preprocessing_cv.py"),
+        code=f"{s3_bucket_base_path_code}hyperparameter_tuning/preprocessing_cv.py",
         job_arguments=["--k", k]
     )
 
@@ -273,9 +274,7 @@ def get_pipeline(
     hyperparam_tunning_cv_step = ProcessingStep(
         name=hyper_tunning_cv_step_name,
         processor=script_tuner,
-        code=os.path.join(
-            base_dir,"hyperparameter_tuning/cv_hyperparameter_tunning.py"
-        ),
+        code=f"{s3_bucket_base_path_code}hyperparameter_tuning/cv_hyperparameter_tunning.py",
         outputs=[
             ProcessingOutput(
                 output_name="evaluation", 
@@ -335,7 +334,7 @@ def get_pipeline(
                 destination=s3_bucket_base_path_preprocessor             
             )
         ],
-        code=os.path.join(base_dir,"model/preprocessing.py")
+        code=f"{s3_bucket_base_path_code}model/preprocessing.py"
     )
 
 
@@ -344,7 +343,7 @@ def get_pipeline(
     entry_point="train_final_model.py",
     image_uri=image_uri_model,
     instance_type=training_instance_type,
-    source_dir=os.path.join(base_dir,"/model"),
+    source_dir=f"{s3_bucket_base_path_code}/model",
     output_path=s3_bucket_base_path_output,
     role=role
     )
