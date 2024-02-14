@@ -21,6 +21,8 @@ from sagemaker.workflow.functions import JsonGet, Join
 from sagemaker.workflow.pipeline import Pipeline
 from sagemaker.workflow.pipeline_experiment_config import PipelineExperimentConfig
 from sagemaker.workflow.execution_variables import ExecutionVariables
+from sagemaker.workflow.pipeline_context import PipelineSession
+
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -101,19 +103,41 @@ def get_sagemaker_client(region):
     sagemaker_client = boto_session.client("sagemaker")
     return sagemaker_client
 
-def get_pipeline_custom_tags(new_tags, region, sagemaker_project_arn=None):
+def get_pipeline_session(region, default_bucket):
+    """Gets the pipeline session based on the region.
+
+    Args:
+        region: the aws region to start the session
+        default_bucket: the bucket to use for storing the artifacts
+
+    Returns:
+        PipelineSession instance
+    """
+
+    boto_session = boto3.Session(region_name=region)
+    sagemaker_client = boto_session.client("sagemaker")
+
+    return PipelineSession(
+        boto_session=boto_session,
+        sagemaker_client=sagemaker_client,
+        default_bucket=default_bucket,
+    )
+
+def get_pipeline_custom_tags(new_tags, region, sagemaker_project_name=None):
     """Gets the pipeline custom tags.
     
     Args:
         new_tags: Project tags.
         region: The aws region to start the session.
-        sagemaker_project_arn: Amazon Resource Name.
+        sagemaker_project_name: Amazon Resource Name.
         
     Returns:
         Tags.
     """
     try:
         sm_client = get_sagemaker_client(region)
+        response = sm_client.describe_project(ProjectName=sagemaker_project_name)
+        sagemaker_project_arn = response["ProjectArn"]
         response = sm_client.list_tags(
             ResourceArn=sagemaker_project_arn)
         project_tags = response["Tags"]
@@ -140,7 +164,6 @@ def get_pipeline(
     s3_bucket_base_path_code: str = s3_bucket_base_path_code,
     image_uri_model: str = image_uri_model,
     image_uri_tuning: str = image_uri_tuning,
-    sagemaker_project_arn: str = None,
     processing_instance_count: str = processing_instance_count,
     processing_instance_type: str = processing_instance_type,
     transform_instances: List[str] = transform_instances,
@@ -169,7 +192,7 @@ def get_pipeline(
         region: AWS region to create and run the pipeline.
         role: IAM role to create and run steps and pipeline.
         default_bucket: the bucket to use for storing the artifacts.
-        sagemaker_project_arn: ARN of the project.
+        sagemaker_project_name: Name of the project.
         s3_bucket_base_path_train: the folder to use for storing the k train folds.
         s3_bucket_base_path_test: the folder to use for storing the k test folds.
         s3_bucket_base_path_cleaned: the folder to use for storing the cleaned dataset.
@@ -207,6 +230,9 @@ def get_pipeline(
     sagemaker_session = get_session(region, default_bucket)
     if role is None:
         role = session.get_execution_role(sagemaker_session)
+
+    pipeline_session = get_pipeline_session(region, default_bucket)
+
 
     # Print the role for debugging    
     print(f"SageMaker assumes role: {role}.")
