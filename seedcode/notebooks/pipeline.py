@@ -249,7 +249,7 @@ def get_pipeline(
                 destination=s3_bucket_base_path_test
             )
         ],
-        code=f"{s3_bucket_base_path_code}hyperparameter_tuning/preprocessing_cv.py",
+        code=f"{s3_bucket_base_path_code}/hyperparameter_tuning/preprocessing_cv.py",
         job_arguments=["--k", k]
     )
 
@@ -276,7 +276,7 @@ def get_pipeline(
     hyperparam_tunning_cv_step = ProcessingStep(
         name=hyper_tunning_cv_step_name,
         processor=script_tuner,
-        code=f"{s3_bucket_base_path_code}hyperparameter_tuning/cv_hyperparameter_tuning.py",
+        code=f"{s3_bucket_base_path_code}/hyperparameter_tuning/cv_hyperparameter_tuning.py",
         outputs=[
             ProcessingOutput(
                 output_name="evaluation", 
