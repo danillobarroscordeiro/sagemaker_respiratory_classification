@@ -178,6 +178,7 @@ def get_pipeline(
         s3_bucket_base_path_evaluation: the folder to use for storing the evaluation metric.
         s3_bucket_base_path_jobinfo: the folder to use for storing the jobinfo.
         s3_bucket_base_path_output: the folder to use for storing the model.
+        s3_bucket_base_path_code: the folder to use for storing the python scripts and dockerfiles.
         processing_instance_count: number of processing instances to run.
         image_uri_tuning: Docker image to run the cross-validation jobs with the range of hyperparameters.
         image_uri_model: Docker image to fit the XGBoost classifier.
