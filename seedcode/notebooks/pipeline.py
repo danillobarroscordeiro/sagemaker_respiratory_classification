@@ -62,7 +62,7 @@ s3_bucket_base_path_preprocessor = os.path.join(default_bucket, "/estimator/prep
 s3_bucket_base_path_evaluation = os.path.join(default_bucket, "/evaluation")
 s3_bucket_base_path_jobinfo = os.path.join(default_bucket, "/jobinfo")
 s3_bucket_base_path_output = os.path.join(default_bucket, "/output")
-s3_bucket_base_path_code = os.path.join(default_bucket, "/code")
+s3_bucket_base_path_code = f"{default_bucket}/code"
 
 def get_session(region, default_bucket):
     """Gets the sagemaker session based on the region.
