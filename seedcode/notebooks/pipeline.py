@@ -137,6 +137,7 @@ def get_pipeline(
     s3_bucket_base_path_evaluation: str = s3_bucket_base_path_evaluation,
     s3_bucket_base_path_jobinfo: str = s3_bucket_base_path_jobinfo,
     s3_bucket_base_path_output: str = s3_bucket_base_path_output,
+    s3_bucket_base_path_code: str = s3_bucket_base_path_code,
     image_uri_model: str = image_uri_model,
     image_uri_tuning: str = image_uri_tuning,
     sagemaker_project_arn: str = None,
@@ -274,7 +275,7 @@ def get_pipeline(
     hyperparam_tunning_cv_step = ProcessingStep(
         name=hyper_tunning_cv_step_name,
         processor=script_tuner,
-        code=f"{s3_bucket_base_path_code}hyperparameter_tuning/cv_hyperparameter_tunning.py",
+        code=f"{s3_bucket_base_path_code}hyperparameter_tuning/cv_hyperparameter_tuning.py",
         outputs=[
             ProcessingOutput(
                 output_name="evaluation", 
