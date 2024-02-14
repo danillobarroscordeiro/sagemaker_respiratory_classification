@@ -45,8 +45,8 @@ base_job_prefix = f"RespiratoryClassification"
 preprocessing_cv_job_name = f"{base_job_prefix}prepocessing_kfold_split"
 hyper_tunning_job_name = f"{base_job_prefix}KFoldCrossValidationHyperParameterTuner"
 preprocessing_cv_step_name = f"{base_job_prefix}PreprocessingCVStep"
-hyper_tunning_cv_step_name = f"{base_job_prefix}HyperParameterTuningStep",
-preprocessing_step_name = f"{base_job_prefix}PreprocessingStep",
+hyper_tunning_cv_step_name = f"{base_job_prefix}HyperParameterTuningStep"
+preprocessing_step_name = f"{base_job_prefix}PreprocessingStep"
 model_training_step_name = f"{base_job_prefix}ModelTrainingStep"
 register_model_step_name = f"{base_job_prefix}RegisterModelStep"
 model_evaluation_step_name = f"{base_job_prefix}ModelEvaluationStep"
@@ -375,7 +375,7 @@ def get_pipeline(
     role=role
     )
 
-    s3_uri = s3_uri = Join(
+    s3_uri = Join(
         on="", 
         values=[hyperparam_tunning_cv_step.arguments["ProcessingOutputConfig"]["Outputs"][0]["S3Output"]["S3Uri"], 
                 "/evaluation.json"]
