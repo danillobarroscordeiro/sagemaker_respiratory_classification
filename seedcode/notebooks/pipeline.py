@@ -54,14 +54,14 @@ model_evaluation_step_name = f"{base_job_prefix}ModelEvaluationStep"
 
 bucket_name = f"sagemaker-project-p-hnneqf6paono"
 default_bucket = f"s3://{bucket_name}"
-s3_bucket_base_path_train = os.path.join(default_bucket, "/data/train")
-s3_bucket_base_path_test = os.path.join(default_bucket, "/data/test")
-s3_bucket_base_path_cleaned = os.path.join(default_bucket, "/data/cleaned")
-s3_bucket_base_path_processed = os.path.join(default_bucket, "/data/processed")
-s3_bucket_base_path_preprocessor = os.path.join(default_bucket, "/estimator/preprocessor")
-s3_bucket_base_path_evaluation = os.path.join(default_bucket, "/evaluation")
-s3_bucket_base_path_jobinfo = os.path.join(default_bucket, "/jobinfo")
-s3_bucket_base_path_output = os.path.join(default_bucket, "/output")
+s3_bucket_base_path_train = f"{default_bucket}/data/train"
+s3_bucket_base_path_test = f"{default_bucket}/data/train/test"
+s3_bucket_base_path_cleaned = f"{default_bucket}/data/cleaned"
+s3_bucket_base_path_processed = f"{default_bucket}/data/data/processed"
+s3_bucket_base_path_preprocessor =  f"{default_bucket}/estimator/preprocessor"
+s3_bucket_base_path_evaluation = f"{default_bucket}/evaluation"
+s3_bucket_base_path_jobinfo = f"{default_bucket}/jobinfo"
+s3_bucket_base_path_output = f"{default_bucket}/output"
 s3_bucket_base_path_code = f"{default_bucket}/code"
 
 def get_session(region, default_bucket):
