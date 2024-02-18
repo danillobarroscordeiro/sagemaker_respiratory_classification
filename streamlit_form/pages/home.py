@@ -18,7 +18,6 @@ with st.form(key='form1'):
             tp_antivir =  st.text_input("tp_antivir")
     with col2:
             hospital =  st.text_input("hospital")
-            dose_2_cov =  st.text_input("dose_2_cov")
             dose_ref =  st.text_input("dose_ref")
             fnt_in_cov =  st.text_input("fnt_in_cov")
             uti =  st.text_input("uti")
@@ -31,7 +30,6 @@ with st.form(key='form1'):
     with col4:
             cs_zona =  st.text_input("cs_zona")
             perd_pala =  st.text_input("perd_pala")
-            dose_1_cov =  st.text_input("dose_1_cov")
             vacina_cov =  st.text_input("vacina_cov")
     if st.form_submit_button():
         input_data = {
@@ -41,7 +39,6 @@ with st.form(key='form1'):
                 'antiviral': antiviral,
                 'tp_antivir': tp_antivir,
                 'hospital': hospital,
-                'dose_2_cov': dose_2_cov,
                 'dose_ref': dose_ref,
                 'fnt_in_cov': fnt_in_cov,
                 'uti': uti,
@@ -52,7 +49,6 @@ with st.form(key='form1'):
                 'cs_raca': cs_raca,
                 'cs_zona': cs_zona,
                 'perd_pala': perd_pala,
-                'dose_1_cov': dose_1_cov,
                 'vacina_cov': vacina_cov
         }
         
