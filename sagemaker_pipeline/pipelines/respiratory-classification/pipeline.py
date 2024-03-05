@@ -164,10 +164,8 @@ def get_pipeline(
     s3_bucket_base_path_code: str = s3_bucket_base_path_code,
     image_uri_model: str = image_uri_model,
     image_uri_tuning: str = image_uri_tuning,
-    #processing_instance_count: str = processing_instance_count,
     processing_instance_type: str = processing_instance_type,
     transform_instances: List[str] = transform_instances,
-    #training_instance_count: str = training_instance_count,
     inference_instances: List[str] = inference_instances,
     hpo_tuner_instance_type: str = hpo_tuner_instance_type,
     model_package_group_name: str = model_package_group_name,
@@ -181,10 +179,6 @@ def get_pipeline(
     model_training_step_name: str = model_training_step_name,
     register_model_step_name: str = register_model_step_name,
     model_evaluation_step_name: str = model_evaluation_step_name
-    #baseline_model_objective_value: float = baseline_model_objective_value
-    #k: str = k,
-    #max_tuning_jobs: str = max_tuning_jobs,
-    #max_parallel_jobs: str = max_parallel_jobs
     ):
     """Gets a SageMaker ML Pipeline instance working with respiratory disease data.
     
@@ -398,7 +392,7 @@ def get_pipeline(
     )
 
 
-   # Register Model step
+    # Register Model step
     model = Model(
     image_uri=model_train_estimator.image_uri,
     model_data=model_training_step.properties.ModelArtifacts.S3ModelArtifacts,
