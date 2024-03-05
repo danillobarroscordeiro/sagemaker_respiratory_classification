@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 
-endpoint = "https://4us3v5rmw2yh4sokm77udggh4q0zqrmd.lambda-url.us-east-1.on.aws/"
+endpoint = "https://4wkle67zfjrg66djlk4m5hfs5a0mpkis.lambda-url.us-east-1.on.aws/"
 
 st.set_page_config(
         page_title="SARS Suspected Case Form"
@@ -134,8 +134,6 @@ with st.form(key='form1'):
 
         if st.form_submit_button():
                 input_data = {
-                        'sem_pri': sem_pri,
-                        'Age': nu_idade_n,
                         'saturacao': saturacao,
                         'antiviral': antiviral,
                         'tp_antivir': tp_antivir,
@@ -148,26 +146,31 @@ with st.form(key='form1'):
                         'cs_raca': cs_raca,
                         'cs_zona': cs_zona,
                         'perd_pala': perd_pala,
-                        'vacina_cov': vacina_cov
+                        'vacina_cov': vacina_cov,
+                        'sem_pri': sem_pri,
+                        'nu_idade_n': nu_idade_n
                 }
         
                 response = requests.post(endpoint, json=input_data)
         
                 if response.status_code == 200:
                         output_data = response.json()
-                        st.write("Result: SARS caused by")
-                        st.write(output_data)
-                        print(output_data)
-                        if output_data == 1:
+                        output_data_class = output_data['output_data']
+                        if output_data_class == 1:
                                 st.write("Result: SARS caused by Influenza")
-                        elif output_data == 2:
+                        elif output_data_class == 2:
                                 st.write("Result: SARS caused by respiratory virus")
-                        elif output_data == 3:
+                        elif output_data_class == 3:
                                 st.write("Result: SARS caused by other etiologic agent")
-                        elif output_data == 4:
+                        elif output_data_class == 4:
                                 st.write("Result: SARS does not specified")
                         else:
                                 st.write("Result: SARS caused by COVID-19")                                
                         
                 else:
+                        print(response.text)
+                        print(response.status_code)
+
+                        output_data = response.json()
+                        st.write(output_data)
                         st.write("Error in API request")
