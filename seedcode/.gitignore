@@ -1,7 +1,0 @@
-*.ipynb_checkpoints
-*/.ipynb_checkpoints/*
-first_cicle copy.ipynb
-first_cicle copy 2.ipynb
-*.csv
-*.parquet
-.env
