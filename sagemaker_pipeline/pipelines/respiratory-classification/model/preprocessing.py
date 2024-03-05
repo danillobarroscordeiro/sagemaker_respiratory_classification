@@ -9,7 +9,7 @@ from sklearn.preprocessing import LabelEncoder, MinMaxScaler, OneHotEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split, KFold
 import logging
-from joblib import dump
+from pickle import dump
 
 
 # Defines the base target directory for datasets.
@@ -66,7 +66,9 @@ def preprocess_data(df):
     
     #save preprocessor to use in deployment
     os.makedirs(f'{base_dir}/output/preprocessor', exist_ok=True)
-    dump(preprocessor, f'{base_dir}/output/preprocessor/preprocessor.joblib')
+    with open(f'{base_dir}/output/preprocessor/preprocessor.pkl', "wb") as f:
+        dump(preprocessor, f)
+    
     return X_transformed, y
 
 def save_data(X, y):
