@@ -1,5 +1,7 @@
 # Respiratory Classification
 
+![](figures/sars.jpg)
+
 ## 1. Business problem
 
 This project predicts which type of SARS virus a patient has contracted using an XGBoost model. The model is deployed on AWS using SageMaker, and a medical form for patient data input is available via a Streamlit web API.
