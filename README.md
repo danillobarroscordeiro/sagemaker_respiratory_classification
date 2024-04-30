@@ -14,7 +14,7 @@ This project predicts which type of SARS virus a patient has contracted using an
 
 
 ## 3. Dataset
-The dataCreating an AWS crawler to retrieve and catalog dataset metadata stored in an S3 bucket using AWS Glue.set includes about 700,000 records from Brazilian hospital patients showing symptoms of the SARS virus. It has 76 features covering demographic details, symptoms, test results (e.g., Chest X-ray, CT scans), vaccination history, and conditions like diabetes and obesity. The "CLASSI_FIN" field specifies the type of SARS virus diagnosed. The patients were diagnosed with one of the following labels:
+The dataset includes about 700,000 records from Brazilian hospital patients showing symptoms of the SARS virus. It has 76 features covering demographic details, symptoms, test results (e.g., Chest X-ray, CT scans), vaccination history, and conditions like diabetes and obesity. The "CLASSI_FIN" field specifies the type of SARS virus diagnosed. The patients were diagnosed with one of the following labels:
 
 1-SARS by influenza \
 2-SARS by other respiratory virus \
